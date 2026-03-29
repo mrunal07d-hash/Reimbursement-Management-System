@@ -1,0 +1,35 @@
+.expense-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+.expense-form-main { display: flex; flex-direction: column; }
+.expense-form-side { display: flex; flex-direction: column; }
+
+.dropzone {
+  border: 2px dashed var(--border-light);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.dropzone:hover, .dropzone.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.dropzone.has-file {
+  border-color: var(--success);
+  border-style: solid;
+  background: var(--success-light);
+}
+
+@media (max-width: 900px) {
+  .expense-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
