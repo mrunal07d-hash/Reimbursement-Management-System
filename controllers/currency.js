@@ -1,41 +1,12 @@
-const axios = require('axios');
+const express = require('express');
+const router = express.Router();
+const { protect } = require('../middleware/auth');
+const {
+  getExchangeRates,
+  convertCurrency
+} = require('../controllers/currencyController');
 
-exports.getExchangeRates = async (req, res) => {
-  try {
-    const { base } = req.query;
-    const baseCurrency = base || 'INR';
-    
-    // Using free exchangerate API
-    const response = await axios.get(
-      `https://api.exchangerate-api.com/v4/latest/${baseCurrency}`
-    );
-    
-    res.json({
-      success: true,
-      base: baseCurrency,
-      rates: response.data.rates
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
+router.get('/rates', protect, getExchangeRates);
+router.post('/convert', protect, convertCurrency);
 
-exports.convertCurrency = async (req, res) => {
-  try {
-    const { amount, from, to } = req.body;
-    
-    const response = await axios.get(
-      `https://api.exchangerate-api.com/v4/latest/${from}`
-    );
-    
-    const rate = response.data.rates[to];
-    if (!rate) {
-      return res.status(400).json({ success: false, message: 'Invalid currency code' });
-    }
-    
-    const converted = (amount * rate).toFixed(2);
-    res.json({ success: true, amount, from, to, rate, converted: parseFloat(converted) });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
+module.exports = router;
