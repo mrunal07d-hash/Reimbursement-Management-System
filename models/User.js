@@ -1,19 +1,65 @@
-const express = require('express');
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
-const router = express.Router();
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Name is required'],
+    trim: true
+  },
+  email: {
+    type: String,
+    required: [true, 'Email is required'],
+    unique: true,
+    lowercase: true,
+    trim: true
+  },
+  password: {
+    type: String,
+    required: [true, 'Password is required'],
+    minlength: 6,
+    select: false
+  },
+  role: {
+    type: String,
+    enum: ['employee', 'manager', 'admin'],
+    default: 'employee'
+  },
+  company: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Company'
+  },
+  department: {
+    type: String,
+    trim: true
+  },
+  managerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  profileImage: {
+    type: String
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+}, { timestamps: true });
 
-const { signup, login, getMe, updateProfile, changePassword } = require('../controllers/authController');
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
 
-const { authenticate } = require('../middleware/auth');
+// Compare password method
+userSchema.methods.matchPassword = async function(enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
-router.post('/signup', signup);
-
-router.post('/login', login);
-
-router.get('/me', authenticate, getMe);
-
-router.put('/profile', authenticate, updateProfile);
-
-router.put('/password', authenticate, changePassword);
-
-module.exports = router;
+module.exports = mongoose.model('User', userSchema);
