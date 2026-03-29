@@ -1,11 +1,12 @@
 const express = require('express');
-
 const router = express.Router();
+const { protect } = require('../middleware/auth');
+const {
+  getExchangeRates,
+  convertCurrency
+} = require('../controllers/currencyController');
 
-const { getCountriesAndCurrencies, convertCurrency } = require('../controllers/currencyController');
+router.get('/rates', protect, getExchangeRates);
+router.post('/convert', protect, convertCurrency);
 
-router.get('/all', getCountriesAndCurrencies);
-
-router.get('/convert', convertCurrency);
-
-module.exports = router;   
+module.exports = router;
